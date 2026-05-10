@@ -1,15 +1,21 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
+      "source": "/godrej",
+      "destination": "/views/godrej.html"
+    },
     {
-      "src": "/(.*)",
-      "dest": "server.js"
+      "source": "/oberoi",
+      "destination": "/views/oberoi.html"
+    },
+    {
+      "source": "/",
+      "destination": "/views/index.html"
+    },
+    {
+      "source": "/(css|js|images)/(.*)",
+      "destination": "/public/$1/$2"
     }
   ]
 }
