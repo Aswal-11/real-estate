@@ -15,6 +15,27 @@
   --radius: 0.75rem;
 }
 
+/* ============================================
+   BULLETPROOF STICKY CTA - Mobile Fix
+   Fixes iOS Safari / Android Chrome disappearing
+   fixed elements on page refresh / scroll
+   ============================================ */
+.sticky-cta {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  /* Force GPU compositing - prevents iOS Safari disappear bug */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
+  /* Safe area for phones with home indicator (iPhone X+) */
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
 * {
   margin: 0;
   padding: 0;
