@@ -13,11 +13,16 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+// Initialize Supabase safely
+let supabase = null;
+if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+  supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY
+  );
+} else {
+  console.warn("WARNING: Supabase credentials not found in environment variables. Lead form submissions will fail.");
+}
 
 // Middleware
 app.use(express.static('public'));
@@ -57,6 +62,10 @@ app.post('/api/leads', async (req, res) => {
       return res.status(400).json({ 
         error: 'Missing required fields' 
       });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database credentials not configured. Please add SUPABASE_URL and SUPABASE_KEY to your environment variables.' });
     }
 
     // Check for duplicates (same phone + project within 24 hours)
@@ -115,17 +124,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`
-  ╔══════════════════════════════════════════════════════════════╗
-  ║  Real Estate Landing Pages Server Running                   ║
-  ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-  ║  🌐 Home:     http://localhost:${PORT}                     ║
-  ║  🏢 Godrej:   http://localhost:${PORT}/godrej             ║
-  ║  🏢 Oberoi:   http://localhost:${PORT}/oberoi             ║
-  ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-  ║  API: POST /api/leads (for form submissions)               ║
-  ╚══════════════════════════════════════════════════════════════╝
-  `);
-});
+// Start server (only if not running on Vercel serverless)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel
+export default app;
